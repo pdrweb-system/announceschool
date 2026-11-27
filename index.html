@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เครื่องมือสร้างภาพข่าวประชาสัมพันธ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f3f6f2;--card:#fff;--ink:#1d2a22;--muted:#66756b;--line:#dfe6df;--pri:#0f6b3a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Sarabun",system-ui,sans-serif;font-size:15px}
+  header{background:var(--pri);color:#fff;padding:14px 18px}
+  header h1{margin:0;font-family:"Prompt";font-weight:600;font-size:19px}
+  header p{margin:2px 0 0;opacity:.85;font-size:13px}
+  .wrap{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:18px;padding:18px;max-width:1240px;margin:0 auto}
+  @media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);padding:12px}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .card h2{font-family:"Prompt";font-size:15px;font-weight:600;margin:0 0 4px;color:var(--pri);display:flex;align-items:center;gap:8px}
+  .lock{font-size:11px;font-weight:500;background:#eef6f0;color:var(--pri);border-radius:20px;padding:2px 8px}
+  .sub{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input[type=text],input[type=date],textarea,select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:inherit;color:var(--ink);background:#fff}
+  textarea{resize:vertical;min-height:70px}
+  input:focus,textarea:focus{outline:2px solid var(--pri);outline-offset:-1px;border-color:transparent}
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .seg button{flex:1 1 auto;padding:8px 10px;border:1px solid var(--line);background:#fff;border-radius:9px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+  .seg button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+  .person{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+  .person:first-of-type{border-top:0}
+  .pic{width:64px;height:64px;border-radius:50%;background:#f0f0f0;border:1px dashed #b9c6bd;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:11px;cursor:pointer;text-align:center;line-height:1.2}
+  .pic img{width:100%;height:100%;object-fit:cover}
+  .person .t{font-family:"Prompt";font-size:13px;font-weight:600;margin-bottom:4px}
+  .person input{margin-bottom:6px}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted);cursor:pointer;font-size:13px;background:#fafcfa}
+  .drop:hover{border-color:var(--pri);color:var(--pri)}
+  .big{aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#fafcfa;border:2px dashed var(--line);display:grid;place-items:center;color:var(--muted);cursor:pointer;font-size:13px}
+  .big img{width:100%;height:100%;object-fit:cover}
+  .thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
+  .thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#eee}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .x{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:12px;line-height:20px;padding:0}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;cursor:pointer;color:var(--ink)}
+  .btn.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+  .btn.sm{padding:6px 10px;font-size:13px;font-weight:500}
+  .btn:disabled{opacity:.55;cursor:default}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .preview-col{position:sticky;top:12px;align-self:start}
+  @media (max-width:860px){.preview-col{position:static}}
+  .stage{background:#e4e9e4;border-radius:14px;padding:14px;display:flex;justify-content:center}
+  .stage img{max-width:100%;max-height:78vh;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.18);display:block}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+  .msg{font-size:13px;margin-top:8px;color:var(--pri);min-height:18px}
+  .msg.err{color:#b3261e}
+  .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--pri);color:#fff;font-size:12px;flex:none}
+  .colors{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .colors label{display:flex;align-items:center;gap:6px;margin:0}
+  input[type=color]{width:40px;height:32px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff}
+  input[type=range]{width:100%}
+  #prompt{min-height:190px;font-size:13px;font-family:ui-monospace,Menlo,monospace}
+  .bgprev{display:flex;gap:10px;align-items:center;margin-top:8px}
+  .bgprev img{width:60px;height:75px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+  .hidden{display:none!important}
+  canvas{display:none}
+  .presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+  .presets button{display:flex;align-items:center;gap:6px;padding:7px 8px;border:1px solid var(--line);background:#fff;border-radius:9px;font:inherit;font-size:12.5px;cursor:pointer;color:var(--ink);text-align:left;line-height:1.2}
+  .presets button.on{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri);background:#f3faf5}
+  .presets i{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+  details summary{cursor:pointer;font-size:13px;color:var(--pri)}
+</style>
+</head>
+<body>
+<header>
+  <h1>สร้างภาพข่าวประชาสัมพันธ์</h1>
+  <p>ตำแหน่งข้อมูล 8 อย่างล็อกไว้ ส่วนพื้นหลัง ธีม และการตกแต่ง ให้ ChatGPT สร้างตาม prompt ของคุณ</p>
+</header>
+
+<div class="wrap">
+<div class="form-col">
+
+  <div class="card">
+    <h2><span class="step">1</span>โลโก้และชื่อโรงเรียน <span class="lock">🔒 ล็อก</span></h2>
+    <p class="sub">โลโก้ ภาพผู้บริหาร และชื่อผู้บริหาร จำไว้ในเครื่องนี้ ไม่ต้องใส่ใหม่ทุกครั้ง</p>
+    <div class="person" style="border-top:0">
+      <div class="pic" id="logoPic" data-slot="logo">โลโก้</div>
+      <div>
+        <input type="text" id="school" value="โรงเรียนวัดปรีดาราม (มณีศิริวรรณ)">
+        <input type="text" id="affil" placeholder="สังกัด เช่น สำนักงานเขตพื้นที่การศึกษาประถมศึกษา...">
+      </div>
+    </div>
+    <label for="label">ป้ายหัวข่าว</label>
+    <input type="text" id="label" value="ข่าวประชาสัมพันธ์">
+  </div>
+
+  <div class="card">
+    <h2><span class="step">2</span>ผู้บริหาร <span class="lock">🔒 ล็อก</span></h2>
+    <p class="sub">แตะวงกลมเพื่อใส่รูป ช่องที่ว่างทั้งรูปและชื่อจะไม่แสดงในภาพ</p>
+    <div class="person">
+      <div class="pic" data-slot="p0">ผอ.เขต</div>
+      <div><div class="t">ผู้อำนวยการเขตพื้นที่ฯ</div>
+        <input type="text" id="n0" placeholder="ชื่อ-นามสกุล">
+        <input type="text" id="r0" value="ผู้อำนวยการสำนักงานเขตพื้นที่การศึกษา"></div>
+    </div>
+    <div class="person">
+      <div class="pic" data-slot="p1">ผอ.<br>โรงเรียน</div>
+      <div><div class="t">ผู้อำนวยการโรงเรียน</div>
+        <input type="text" id="n1" placeholder="ชื่อ-นามสกุล">
+        <input type="text" id="r1" value="ผู้อำนวยการโรงเรียน"></div>
+    </div>
+    <div class="person">
+      <div class="pic" data-slot="p2">รอง ผอ.</div>
+      <div><div class="t">รองผู้อำนวยการโรงเรียน</div>
+        <input type="text" id="n2" placeholder="ชื่อ-นามสกุล">
+        <input type="text" id="r2" value="รองผู้อำนวยการโรงเรียน"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">3</span>ข่าวกิจกรรม <span class="lock">🔒 ล็อก</span></h2>
+    <label for="headline">ชื่อกิจกรรม</label>
+    <textarea id="headline" rows="2">กิจกรรมวันลอยกระทง ประจำปี 2569</textarea>
+    <label for="date">วันที่จัดกิจกรรม</label>
+    <input type="date" id="date">
+    <label for="detail">คำบรรยายกิจกรรม</label>
+    <textarea id="detail" rows="3">คณะครูและนักเรียนร่วมกันประดิษฐ์กระทงจากวัสดุธรรมชาติ เพื่ออนุรักษ์ประเพณีไทยและรักษาสิ่งแวดล้อม</textarea>
+    <label>ภาพใหญ่ (1 ภาพ)</label>
+    <div class="big" id="bigBox">แตะเพื่อเลือกภาพหลัก</div>
+    <label>ภาพเล็ก (สูงสุด 6 ภาพ)</label>
+    <div class="drop" id="drop">แตะเพื่อเลือกหลายภาพ หรือลากมาวาง</div>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">4</span>ขนาดและสี</h2>
+    <label>ขนาดภาพ</label>
+    <div class="seg" id="sizeSeg">
+      <button data-v="1080x1350" class="on" type="button">โพสต์ 4:5</button>
+      <button data-v="1080x1528" type="button">แนวตั้ง A4</button>
+      <button data-v="1080x1920" type="button">สตอรี่ 9:16</button>
+    </div>
+    <label>สีตัวอักษรและป้าย (ปรับให้เข้ากับพื้นหลัง)</label>
+    <div class="colors">
+      <label><input type="color" id="cPri" value="#0f6b3a"> สีหลัก</label>
+      <label><input type="color" id="cAcc" value="#f2c230"> สีป้าย</label>
+      <button class="btn sm hidden" id="autoColor" type="button">ดึงสีจากพื้นหลัง</button>
+    </div>
+    <label for="op">ความทึบของแผ่นรองข้อความ: <b id="opV">90</b>%</label>
+    <input type="range" id="op" min="0" max="100" value="90">
+  </div>
+
+  <div class="card">
+    <h2><span class="step">5</span>พื้นหลังจาก ChatGPT</h2>
+    <p class="sub">ก. ดาวน์โหลดภาพโครงร่าง ข. คัดลอก prompt แล้วแนบภาพโครงร่างไปใน ChatGPT ค. นำภาพที่ได้กลับมาใส่ที่นี่</p>
+    <label>เลือกธีมสำเร็จรูป (กดแล้วปรับสีตัวอักษรให้ด้วย)</label>
+    <div class="presets" id="presets"></div>
+    <label for="theme">รายละเอียดธีม/สไตล์ (แก้ไขหรือพิมพ์เพิ่มได้)</label>
+    <textarea id="theme" rows="4">ประเพณีลอยกระทง บรรยากาศยามค่ำคืนริมน้ำ โทนน้ำเงินกรมท่าและทอง มีกระทงใบตองดอกดาวเรือง แสงเทียน โคมไฟลอยฟ้า ดอกบัว พระจันทร์เต็มดวงสะท้อนผิวน้ำ ลวดลายไทยสีทองที่ขอบภาพ</textarea>
+    <label for="mood">ความเข้มของการตกแต่ง</label>
+    <div class="seg" id="moodSeg">
+      <button data-v="soft" type="button">เรียบ สุภาพ</button>
+      <button data-v="normal" class="on" type="button">พอดี</button>
+      <button data-v="rich" type="button">จัดเต็ม</button>
+    </div>
+    <details style="margin-top:10px"><summary>ดู/แก้ prompt ฉบับเต็ม</summary>
+      <textarea id="prompt" style="margin-top:8px"></textarea>
+    </details>
+    <div class="actions">
+      <button class="btn sm" id="guideBtn" type="button">ก. ดาวน์โหลดภาพโครงร่าง</button>
+      <button class="btn sm" id="copyPrompt" type="button">ข. คัดลอก prompt</button>
+      <button class="btn sm pri" id="bgBtn" type="button">ค. ใส่ภาพพื้นหลัง</button>
+    </div>
+    <div class="bgprev hidden" id="bgPrev"><img id="bgThumb" alt=""><button class="btn sm" id="bgDel" type="button">ใช้พื้นหลังเริ่มต้น</button></div>
+    <div class="msg" id="pMsg"></div>
+  </div>
+
+  <div class="card hidden" id="capCard">
+    <h2><span class="step">6</span>แคปชันสำหรับโพสต์</h2>
+    <button class="btn" id="capBtn" type="button">✨ ให้ Claude ช่วยเขียนแคปชัน</button>
+    <textarea id="capOut" style="margin-top:10px;min-height:140px" placeholder="แคปชันจะขึ้นที่นี่ แก้ไขต่อได้"></textarea>
+    <div class="actions"><button class="btn sm" id="capCopy" type="button">คัดลอกแคปชัน</button></div>
+    <div class="msg" id="capMsg"></div>
+  </div>
+</div>
+
+<div class="preview-col">
+  <div class="card">
+    <h2>ตัวอย่างภาพ</h2>
+    <div class="stage"><img id="preview" alt="ตัวอย่างภาพข่าว"></div>
+    <div class="actions"><button class="btn pri" id="dlBtn" type="button">ดาวน์โหลด PNG</button></div>
+    <div class="msg" id="dlMsg"></div>
+    <div class="hint">บนมือถือ กดค้างที่ภาพเพื่อบันทึกได้เช่นกัน</div>
+  </div>
+</div>
+</div>
+<input type="file" id="oneFile" accept="image/*" hidden>
+<input type="file" id="manyFile" accept="image/*" multiple hidden>
+<canvas id="cv"></canvas>
+
+<script>
+(() => {
+  const $=id=>document.getElementById(id);
+  const cv=$('cv'), ctx=cv.getContext('2d');
+  const TH_MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const S={size:'1080x1350', imgs:{logo:null,p0:null,p1:null,p2:null}, big:null, small:[], bg:null};
+  $('date').value=new Date().toISOString().slice(0,10);
+
+  // ---------- storage ----------
+  const TEXT_IDS=['school','affil','label','n0','r0','n1','r1','n2','r2','headline','detail','theme','cPri','cAcc','op'];
+  const store={
+    get(k){try{return localStorage.getItem(k);}catch(e){return null;}},
+    set(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return false;}},
+    del(k){try{localStorage.removeItem(k);}catch(e){}}
+  };
+  function saveText(){
+    const d={size:S.size,preset:S.preset,mood:S.mood}; TEXT_IDS.forEach(id=>d[id]=$(id).value);
+    store.set('newsimg.v2.text',JSON.stringify(d));
+  }
+  function restoreText(){
+    try{
+      const d=JSON.parse(store.get('newsimg.v2.text')||'null'); if(!d) return;
+      TEXT_IDS.forEach(id=>{ if(typeof d[id]==='string') $(id).value=d[id]; });
+      if(d.preset) S.preset=d.preset;
+      if(d.mood) S.mood=d.mood;
+      if(d.size){S.size=d.size;[...$('sizeSeg').children].forEach(c=>c.classList.toggle('on',c.dataset.v===d.size));}
+    }catch(e){}
+  }
+
+  // ---------- image loading ----------
+  function fileToImg(file){
+    return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=u;});
+  }
+  function srcToImg(src){
+    return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src;});
+  }
+  // shrink to dataURL for remembering in this browser
+  function shrink(img,max,type){
+    const s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    return c.toDataURL(type,0.88);
+  }
+  function setPic(slot,img){
+    const el=document.querySelector(`.pic[data-slot="${slot}"]`);
+    if(!el.dataset.label) el.dataset.label=el.innerHTML;
+    if(img){ el.textContent=''; const i=document.createElement('img'); i.src=img.src; el.appendChild(i); }
+    else el.innerHTML=el.dataset.label;
+  }
+  let pickCb=null;
+  $('oneFile').onchange=async e=>{const f=e.target.files[0]; e.target.value=''; if(f&&pickCb){try{pickCb(await fileToImg(f));}catch(_){}}};
+  function pickOne(cb){pickCb=cb;$('oneFile').click();}
+
+  document.querySelectorAll('.pic').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const slot=el.dataset.slot;
+      if(S.imgs[slot] && !confirmInline(el)) return;
+      pickOne(async img=>{
+        const url=shrink(img, slot==='logo'?500:600, slot==='logo'?'image/png':'image/jpeg');
+        S.imgs[slot]=await srcToImg(url); store.set('newsimg.v2.'+slot,url);
+        setPic(slot,S.imgs[slot]); render();
+      });
+    });
+  });
+  // tap a filled circle once = shows remove/replace choice via small inline toggle
+  function confirmInline(el){
+    if(el.dataset.armed){ delete el.dataset.armed; return true; }
+    el.dataset.armed='1';
+    const slot=el.dataset.slot;
+    const bar=document.createElement('div'); bar.className='actions';
+    const rep=document.createElement('button'); rep.className='btn sm'; rep.type='button'; rep.textContent='เปลี่ยนรูป';
+    const del=document.createElement('button'); del.className='btn sm'; del.type='button'; del.textContent='ลบรูป';
+    rep.onclick=()=>{bar.remove(); el.click();};
+    del.onclick=()=>{bar.remove(); delete el.dataset.armed; S.imgs[slot]=null; store.del('newsimg.v2.'+slot); setPic(slot,null); render();};
+    el.parentElement.querySelector(':scope > div:last-child').appendChild(bar);
+    setTimeout(()=>{ if(bar.isConnected){bar.remove(); delete el.dataset.armed;} },5000);
+    return false;
+  }
+  async function restoreImgs(){
+    for(const slot of Object.keys(S.imgs)){
+      const u=store.get('newsimg.v2.'+slot);
+      if(u){ try{S.imgs[slot]=await srcToImg(u); setPic(slot,S.imgs[slot]);}catch(e){} }
+    }
+  }
+
+  // big photo
+  $('bigBox').onclick=()=>pickOne(img=>{S.big=img; const b=$('bigBox'); b.textContent=''; const i=document.createElement('img'); i.src=img.src; b.appendChild(i); render();});
+  // small photos
+  const drop=$('drop');
+  drop.onclick=()=>$('manyFile').click();
+  $('manyFile').onchange=e=>{const fs=[...e.target.files]; e.target.value=''; addSmall(fs);};
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.style.borderColor='var(--pri)';});
+  drop.addEventListener('dragleave',()=>drop.style.borderColor='');
+  drop.addEventListener('drop',e=>{e.preventDefault();drop.style.borderColor='';addSmall([...e.dataTransfer.files]);});
+  async function addSmall(files){
+    for(const f of files){ if(S.small.length>=6) break; if(!f.type.startsWith('image/')) continue; try{S.small.push(await fileToImg(f));}catch(e){} }
+    drawThumbs(); render();
+  }
+  function drawThumbs(){
+    const t=$('thumbs'); t.textContent='';
+    S.small.forEach((im,i)=>{
+      const d=document.createElement('div'); d.className='thumb';
+      const img=document.createElement('img'); img.src=im.src; d.appendChild(img);
+      const x=document.createElement('button'); x.className='x'; x.type='button'; x.textContent='×';
+      x.onclick=()=>{S.small.splice(i,1);drawThumbs();render();}; d.appendChild(x); t.appendChild(d);
+    });
+    drop.classList.toggle('hidden',S.small.length>=6);
+  }
+
+  // background
+  $('bgBtn').onclick=()=>pickOne(img=>{S.bg=img; $('bgThumb').src=img.src; $('bgPrev').classList.remove('hidden'); $('autoColor').classList.remove('hidden'); autoColor(); render();});
+  $('bgDel').onclick=()=>{S.bg=null; $('bgPrev').classList.add('hidden'); $('autoColor').classList.add('hidden'); render();};
+  $('autoColor').onclick=()=>{autoColor(); render();};
+  function autoColor(){
+    if(!S.bg) return;
+    const c=document.createElement('canvas'); c.width=40; c.height=50; const x=c.getContext('2d');
+    x.drawImage(S.bg,0,0,40,50); const d=x.getImageData(0,0,40,50).data;
+    // pick most saturated dark-ish pixel cluster as primary, brightest saturated as accent
+    let best=null,bestS=-1,acc=null,accS=-1;
+    for(let i=0;i<d.length;i+=4){
+      const r=d[i],g=d[i+1],b=d[i+2]; const mx=Math.max(r,g,b),mn=Math.min(r,g,b); const sat=mx?(mx-mn)/mx:0; const lum=(r*299+g*587+b*114)/1000;
+      if(lum<110 && sat*(130-lum)>bestS){bestS=sat*(130-lum);best=[r,g,b];}
+      if(lum>140 && sat*lum>accS){accS=sat*lum;acc=[r,g,b];}
+    }
+    const hex=a=>'#'+a.map(v=>v.toString(16).padStart(2,'0')).join('');
+    if(best) $('cPri').value=hex(best.map(v=>Math.round(v*0.85)));
+    if(acc) $('cAcc').value=hex(acc);
+    saveText();
+  }
+
+  // ---------- text helpers ----------
+  const segTh=(typeof Intl!=='undefined'&&Intl.Segmenter)?new Intl.Segmenter('th',{granularity:'word'}):null;
+  const tokens=t=>segTh?[...segTh.segment(t)].map(s=>s.segment):t.split(/(\s+)/);
+  function wrap(text,maxW,maxLines){
+    const out=[];
+    for(const para of String(text).split('\n')){
+      let line='';
+      for(const tk of tokens(para)){
+        const test=line+tk;
+        if(ctx.measureText(test).width<=maxW){line=test;continue;}
+        if(line.trim()===''){ let part=''; for(const ch of tk){ if(ctx.measureText(part+ch).width>maxW&&part){out.push(part);part=ch;} else part+=ch; } line=part; }
+        else { out.push(line.trimEnd()); line=tk.trimStart(); }
+      }
+      out.push(line.trimEnd());
+    }
+    const lines=out.filter((l,i)=>l!==''||i===0);
+    if(maxLines&&lines.length>maxLines){
+      const cut=lines.slice(0,maxLines); let last=cut[maxLines-1];
+      while(last&&ctx.measureText(last+'…').width>maxW) last=last.slice(0,-1);
+      cut[maxLines-1]=last+'…'; return {lines:cut,overflow:true};
+    }
+    return {lines,overflow:false};
+  }
+  function fit(text,weight,family,start,min,maxW,maxLines,lineH,maxH){
+    let size=start,r;
+    while(true){
+      ctx.font=`${weight} ${size}px "${family}"`; r=wrap(text,maxW,maxLines);
+      const h=r.lines.length*size*lineH;
+      if((!r.overflow&&(!maxH||h<=maxH))||size<=min) break;
+      size-=1;
+    }
+    ctx.font=`${weight} ${size}px "${family}"`;
+    return {size,lines:r.lines,lh:size*lineH};
+  }
+  function lines(ls,x,y,lh,align){ctx.textAlign=align||'left';ctx.textBaseline='alphabetic';ls.forEach((l,i)=>ctx.fillText(l,x,y+i*lh));}
+  function thaiDate(v){if(!v)return'';const[y,m,d]=v.split('-').map(Number);if(!y||!m||!d)return'';return `${d} ${TH_MONTHS[m-1]} ${y+543}`;}
+
+  // ---------- drawing helpers ----------
+  function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function cover(img,x,y,w,h,r,fy=0.5){
+    ctx.save(); rr(x,y,w,h,r); ctx.clip();
+    const s=Math.max(w/img.naturalWidth,h/img.naturalHeight), iw=img.naturalWidth*s, ih=img.naturalHeight*s;
+    ctx.drawImage(img,x+(w-iw)/2,y+(h-ih)*fy,iw,ih); ctx.restore();
+  }
+  function ph(x,y,w,h,r,text,big){
+    ctx.save(); rr(x,y,w,h,r); ctx.fillStyle='rgba(220,226,222,.95)'; ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.font=`500 ${big?30:18}px "Prompt"`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(text,x+w/2,y+h/2); ctx.restore();
+  }
+  function panel(x,y,w,h,r,op){
+    if(op<=0) return;
+    ctx.save(); ctx.shadowColor=`rgba(0,0,0,${0.18*op})`; ctx.shadowBlur=18; ctx.shadowOffsetY=4;
+    ctx.fillStyle=`rgba(255,255,255,${op})`; rr(x,y,w,h,r); ctx.fill(); ctx.restore();
+  }
+  function frameImg(x,y,w,h,r,col){ // thin white border under photos
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,.22)'; ctx.shadowBlur=14; ctx.shadowOffsetY=4;
+    ctx.fillStyle='#fff'; rr(x-5,y-5,w+10,h+10,r+5); ctx.fill(); ctx.restore();
+  }
+  function circleImg(img,cx,cy,d,ring,ring2){
+    ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,d/2+7,0,Math.PI*2); ctx.fillStyle=ring2; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,d/2+3,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill(); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,d/2,0,Math.PI*2); ctx.clip();
+    if(img){ const s=Math.max(d/img.naturalWidth,d/img.naturalHeight), iw=img.naturalWidth*s, ih=img.naturalHeight*s; ctx.drawImage(img,cx-iw/2,cy-d/2-(ih-d)*0.15,iw,ih); }
+    else { ctx.fillStyle='#dfe5e1'; ctx.fillRect(cx-d/2,cy-d/2,d,d); ctx.fillStyle='#b8c2bc'; ctx.beginPath(); ctx.arc(cx,cy-d*0.1,d*0.2,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(cx,cy+d*0.38,d*0.34,d*0.26,0,0,Math.PI*2); ctx.fill(); }
+    ctx.restore();
+  }
+  function logo(img,x,y,d){
+    ctx.save(); ctx.beginPath(); ctx.arc(x+d/2,y+d/2,d/2,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill(); ctx.clip();
+    const s=Math.min(d/img.naturalWidth,d/img.naturalHeight)*0.92, w=img.naturalWidth*s, h=img.naturalHeight*s;
+    ctx.drawImage(img,x+(d-w)/2,y+(d-h)/2,w,h); ctx.restore();
+  }
+  function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const t=f<0?0:255,p=Math.abs(f);r=Math.round((t-r)*p+r);g=Math.round((t-g)*p+g);b=Math.round((t-b)*p+b);return `rgb(${r},${g},${b})`;}
+
+  // ---------- LAYOUT (locked positions) ----------
+  function layout(W,H){
+    const M=44, g=16, inW=W-2*M;
+    const people=[0,1,2].filter(i=>$('n'+i).value.trim()||S.imgs['p'+i]);
+    const L={M,inW};
+    let y=36;
+    L.header={x:M,y,w:inW,h:128}; y+=128+g;
+    L.title={x:M,y,w:inW,h:188}; y+=188+g;
+    const bottom=[];
+    const hasBoss=people.includes(0);
+    const execH=people.length?(hasBoss&&people.length>1?282:252):0, descH=144, smallH=S.small.length||1?Math.round((inW-5*10)/6):0;
+    const fixed=smallH+12+g+descH+g+(execH?execH+g:0)+36;
+    const bigH=H-y-fixed;
+    L.big={x:M,y,w:inW,h:bigH}; y+=bigH+12+5;
+    L.small={x:M,y,w:inW,h:smallH}; y+=smallH+g;
+    L.desc={x:M,y,w:inW,h:descH}; y+=descH+g;
+    // ผอ.เขต (0) อยู่ตรงกลางเมื่อมีครบ 3 คน
+    let order=people;
+    if(hasBoss&&people.length===3) order=[1,0,2];
+    if(execH) L.exec={x:M,y,w:inW,h:execH,people:order,boss:hasBoss&&people.length>1};
+    return L;
+  }
+
+  function drawAll(W,H,opts={}){
+    const pri=$('cPri').value, acc=$('cAcc').value, op=$('op').value/100;
+    const guide=!!opts.guide;
+    // background
+    if(guide){ ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H); }
+    else if(S.bg){ cover(S.bg,0,0,W,H,0); }
+    else {
+      const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,shade(pri,0.15)); g.addColorStop(1,shade(pri,-0.35));
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.save(); ctx.globalAlpha=0.09; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+      for(let i=-H;i<W;i+=46){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+H,H);ctx.stroke();}
+      ctx.restore();
+      ctx.fillStyle=acc; ctx.fillRect(0,0,W,10); ctx.fillRect(0,H-10,W,10);
+    }
+    const L=layout(W,H);
+    if(guide){ drawGuide(L,W,H); return; }
+
+    // 1) header: logo + school
+    const h=L.header; panel(h.x,h.y,h.w,h.h,22,op);
+    let tx=h.x+22;
+    const ld=h.h-24;
+    if(S.imgs.logo){ logo(S.imgs.logo,h.x+14,h.y+12,ld); tx=h.x+14+ld+18; }
+    const label=$('label').value.trim();
+    let labelW=0;
+    if(label){ ctx.font='600 22px "Prompt"'; labelW=ctx.measureText(label).width+36; }
+    const nameW=h.x+h.w-tx-(labelW?labelW+20:20);
+    const school=$('school').value.trim(), affil=$('affil').value.trim();
+    ctx.fillStyle=pri;
+    const sf=fit(school,'700','Prompt',36,22,nameW,1,1.2);
+    lines(sf.lines,tx,h.y+(affil?h.h/2-4:h.h/2+sf.size*0.36),0);
+    if(affil){ ctx.fillStyle=shade(pri,-0.1); const af=fit(affil,'500','Sarabun',22,15,nameW,1,1.2); ctx.globalAlpha=.85; lines(af.lines,tx,h.y+h.h/2+af.size+6,0); ctx.globalAlpha=1; }
+    if(label){ const lw=labelW, lh=46, lx=h.x+h.w-18-lw, ly=h.y+(h.h-lh)/2;
+      ctx.fillStyle=acc; rr(lx,ly,lw,lh,lh/2); ctx.fill(); ctx.font='600 22px "Prompt"'; ctx.fillStyle=pri; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,lx+lw/2,ly+lh/2+1); }
+
+    // 2) title + date
+    const t=L.title; panel(t.x,t.y,t.w,t.h,22,op);
+    ctx.fillStyle=acc; rr(t.x,t.y+22,10,t.h-44,5); ctx.fill();
+    const head=$('headline').value.trim()||'ชื่อกิจกรรม';
+    ctx.fillStyle=pri;
+    const hf=fit(head,'800','Prompt',58,30,t.w-64,2,1.22,t.h-82);
+    const blockH=hf.lines.length*hf.lh;
+    const topY=t.y+18+((t.h-82)-blockH)/2;
+    lines(hf.lines,t.x+34,topY+hf.size*0.98,hf.lh);
+    const dt=thaiDate($('date').value);
+    if(dt){ const txt='วันที่ '+dt; ctx.font='600 24px "Prompt"'; const dw=ctx.measureText(txt).width+60, dh=44, dx=t.x+34, dy=t.y+t.h-dh-18;
+      ctx.fillStyle=pri; rr(dx,dy,dw,dh,dh/2); ctx.fill();
+      // calendar icon
+      ctx.strokeStyle=acc; ctx.lineWidth=2.5; rr(dx+16,dy+12,20,20,3); ctx.stroke(); ctx.beginPath(); ctx.moveTo(dx+16,dy+18);ctx.lineTo(dx+36,dy+18);ctx.stroke();
+      ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(txt,dx+46,dy+dh/2+1); }
+
+    // 3) big photo
+    const b=L.big; frameImg(b.x,b.y,b.w,b.h,18);
+    if(S.big) cover(S.big,b.x,b.y,b.w,b.h,18); else ph(b.x,b.y,b.w,b.h,18,'ภาพใหญ่',true);
+
+    // 4) small photos (reflow to count, max 6)
+    const sm=L.small, n=Math.max(S.small.length,1), gap=10;
+    if(S.small.length){
+      const cw=(sm.w-gap*(S.small.length-1))/S.small.length;
+      S.small.forEach((im,i)=>{const x=sm.x+i*(cw+gap); frameImg(x,sm.y,cw,sm.h,10); cover(im,x,sm.y,cw,sm.h,10);});
+    } else {
+      const cw=(sm.w-gap*5)/6; for(let i=0;i<6;i++){const x=sm.x+i*(cw+gap); frameImg(x,sm.y,cw,sm.h,10); ph(x,sm.y,cw,sm.h,10,'ภาพเล็ก '+(i+1));}
+    }
+
+    // 5) description
+    const d=L.desc; panel(d.x,d.y,d.w,d.h,20,op);
+    const det=$('detail').value.trim()||'คำบรรยายกิจกรรม';
+    ctx.fillStyle='#2b3530';
+    const df=fit(det,'500','Sarabun',28,18,d.w-56,3,1.42,d.h-36);
+    const dH=df.lines.length*df.lh;
+    lines(df.lines,d.x+28,d.y+(d.h-dH)/2+df.size*1.05,df.lh);
+
+    // 6) executives — ผอ.เขต ใหญ่กว่า
+    if(L.exec){
+      const e=L.exec; panel(e.x,e.y,e.w,e.h,22,op);
+      const ppl=e.people, n=ppl.length;
+      const BIG=150, SMALL=112, ONE=126;
+      // column widths: boss column wider
+      const weights=ppl.map(pi=>e.boss&&pi===0?1.3:1), tot=weights.reduce((a,b)=>a+b,0);
+      const maxDia=e.boss?BIG:ONE;
+      const baseY=e.y+22+maxDia;           // bottom line of all circles
+      let x0=e.x;
+      ppl.forEach((pi,k)=>{
+        const cw=e.w*weights[k]/tot, cx=x0+cw/2; x0+=cw;
+        const isBoss=e.boss&&pi===0;
+        const dia=e.boss?(isBoss?BIG:SMALL):ONE;
+        const cy=baseY-dia/2;
+        circleImg(S.imgs['p'+pi],cx,cy,dia,'#fff',acc);
+        const nm=$('n'+pi).value.trim(), role=$('r'+pi).value.trim();
+        const nameY=baseY+(isBoss?44:40);
+        ctx.fillStyle=pri;
+        const nf=fit(nm||'ชื่อ-นามสกุล','700','Prompt',isBoss?28:22,15,cw-20,1,1.2);
+        lines(nf.lines,cx,nameY,0,'center');
+        if(role){ ctx.fillStyle='#4a5650'; const rf=fit(role,isBoss?'600':'500','Sarabun',isBoss?20:17,13,cw-20,2,1.25);
+          lines(rf.lines,cx,nameY+rf.size+8,rf.lh,'center'); }
+      });
+    }
+  }
+
+  function drawGuide(L,W,H){
+    const box=(r,label)=>{ ctx.fillStyle='#bdbdbd'; rr(r.x,r.y,r.w,r.h,18); ctx.fill();
+      ctx.fillStyle='#6b6b6b'; ctx.font='600 26px "Prompt"'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,r.x+r.w/2,r.y+r.h/2); };
+    box(L.header,'LOGO + SCHOOL NAME'); box(L.title,'TITLE + DATE'); box(L.big,'MAIN PHOTO');
+    box(L.small,'6 SMALL PHOTOS'); box(L.desc,'DESCRIPTION');
+    if(L.exec) box(L.exec,'3 EXECUTIVE PORTRAITS');
+  }
+
+  // ---------- preset themes ----------
+  const PRESETS=[
+    {id:'general',n:'กิจกรรมทั่วไป',pri:'#0f6b3a',acc:'#f2c230',t:'บรรยากาศโรงเรียนประถมศึกษาที่สดใส อบอุ่น โทนเขียวและขาว (สีประจำโรงเรียน) มีลวดลายใบไม้ ต้นไม้ ดินสอ หนังสือ แบบภาพประกอบแบน (flat illustration) ที่มุมภาพ พื้นหลังไล่สีอ่อน สะอาดตา'},
+    {id:'loykrathong',n:'ลอยกระทง',pri:'#1b2f6b',acc:'#f2c230',t:'ประเพณีลอยกระทง บรรยากาศยามค่ำคืนริมน้ำ โทนน้ำเงินกรมท่าและทอง มีกระทงใบตองดอกดาวเรือง แสงเทียน โคมไฟลอยฟ้า ดอกบัว พระจันทร์เต็มดวงสะท้อนผิวน้ำ ลวดลายไทยสีทองที่ขอบภาพ'},
+    {id:'mother',n:'วันแม่ 12 ส.ค.',pri:'#1d4f91',acc:'#9cc7f0',t:'วันแม่แห่งชาติ โทนฟ้าอ่อนและน้ำเงิน อ่อนโยน อบอุ่น มีดอกมะลิสีขาวเป็นสัญลักษณ์ เถามะลิและพวงมาลัยมะลิตกแต่งที่มุมและขอบ แสงนวลฟุ้ง ลวดลายไทยเส้นบางสีเงิน'},
+    {id:'father',n:'วันพ่อ 5 ธ.ค.',pri:'#7a5600',acc:'#f6c900',t:'วันพ่อแห่งชาติ โทนเหลืองทองสง่างาม มีดอกพุทธรักษาสีเหลืองเป็นสัญลักษณ์ ลวดลายไทยสีทองหรูหรา แสงประกายทอง พื้นหลังไล่สีเหลืองครีม ไม่มีภาพบุคคลใด ๆ'},
+    {id:'royal',n:'เทิดพระเกียรติ',pri:'#6b4a00',acc:'#e9c46a',t:'งานเทิดพระเกียรติ โทนเหลือง-ทองสง่างามและเป็นทางการ ลายกนกไทยสีทองประณีต ผ้าม่านจีบสีเหลืองทองที่ขอบบน แสงประกายอ่อน ๆ ไม่มีภาพบุคคล ตราสัญลักษณ์ หรือพระบรมฉายาลักษณ์ใด ๆ'},
+    {id:'waikru',n:'พิธีไหว้ครู',pri:'#6d2a6b',acc:'#f2a93b',t:'พิธีไหว้ครู โทนม่วงและส้มทอง มีพานดอกไม้ ดอกเข็ม ดอกมะเขือ หญ้าแพรก ข้าวตอก ดอกดาวเรือง จัดวางที่มุมภาพ ลวดลายไทยประณีต บรรยากาศเคารพ อบอุ่น'},
+    {id:'teacher',n:'วันครู 16 ม.ค.',pri:'#0b5d73',acc:'#f4b942',t:'วันครู โทนฟ้าเขียวและเหลือง มีภาพประกอบแบบแบนของกระดานดำ ชอล์ก หนังสือ แอปเปิล ดอกไม้ช่อเล็ก ที่มุมภาพ ให้ความรู้สึกขอบคุณและอบอุ่น'},
+    {id:'children',n:'วันเด็ก',pri:'#c2185b',acc:'#ffd23f',t:'วันเด็กแห่งชาติ สีสันสดใสหลากสี ลูกโป่ง ธงราว ดาว ปลาวาฬ ลูกบอล คอนเฟตตี เส้นหยักสนุกสนาน สไตล์การ์ตูนน่ารัก กระจายอยู่ที่ขอบและมุมภาพ'},
+    {id:'sport',n:'กีฬาสี',pri:'#b3261e',acc:'#ffcc00',t:'การแข่งขันกีฬาสีภายในโรงเรียน พลังงานสดใส ไดนามิก ลู่วิ่ง ธงสีแดง เหลือง เขียว ฟ้า ลายเส้นความเร็ว ลูกฟุตบอล ถ้วยรางวัล ที่ขอบและมุมภาพ'},
+    {id:'sunthornphu',n:'วันสุนทรภู่',pri:'#1f5f4a',acc:'#e9b949',t:'วันสุนทรภู่และวันภาษาไทย โทนเขียวหยกและทอง หนังสือเปิด ปากกาขนนก สมุดข่อยไทย ม้วนกระดาษ ลายไทยเส้นบาง บรรยากาศวรรณคดีไทยอ่อนโยน'},
+    {id:'science',n:'วันวิทยาศาสตร์',pri:'#123e7a',acc:'#38d6c4',t:'สัปดาห์วิทยาศาสตร์ โทนน้ำเงินเข้มและฟ้าเทอร์ควอยซ์ ไอคอนแบบแบนของหลอดทดลอง อะตอม แว่นขยาย ดาวเคราะห์ จรวด เฟือง ลายวงจร ที่มุมภาพ ทันสมัย'},
+    {id:'buddhist',n:'วันสำคัญทางพุทธศาสนา',pri:'#8a4b08',acc:'#f5c451',t:'วันสำคัญทางพุทธศาสนา (เช่น วิสาขบูชา เข้าพรรษา) โทนส้มทองและครีม สงบ ศรัทธา มีเทียนพรรษา ดอกบัว ธรรมจักร แสงเรืองอ่อน ลายไทยสีทอง ไม่มีพระพุทธรูปหรือภาพบุคคล'},
+    {id:'songkran',n:'สงกรานต์',pri:'#0d6e9e',acc:'#ffb703',t:'ประเพณีสงกรานต์ สดชื่น โทนฟ้าครามและส้มเหลือง ละอองน้ำ ขันน้ำลายไทย ดอกมะลิ พวงมาลัย ดอกไม้สีสด เจดีย์ทราย ที่มุมและขอบภาพ'},
+    {id:'newyear',n:'ปีใหม่',pri:'#7b1630',acc:'#f2c14e',t:'เทศกาลปีใหม่ โทนแดงเลือดหมูและทอง พลุ ดาวประกาย ริบบิ้น กล่องของขวัญ แสงโบเก้ ที่ขอบภาพ หรูหรา รื่นเริง'},
+    {id:'congrats',n:'แสดงความยินดี',pri:'#6a1b9a',acc:'#ffc94a',t:'ประกาศแสดงความยินดีกับรางวัล/ผลงาน โทนม่วงเข้มและทอง คอนเฟตตีทอง ริบบิ้น เหรียญรางวัล ถ้วยรางวัล ช่อลอเรล แสงประกาย ที่ขอบบนและมุมภาพ'},
+    {id:'openterm',n:'เปิดภาคเรียน',pri:'#0f6b3a',acc:'#ffb000',t:'เปิดภาคเรียนใหม่ สดใส ต้อนรับนักเรียน โทนเขียวและส้มเหลือง กระเป๋านักเรียน ดินสอสี ไม้บรรทัด ใบไม้ เมฆ ดวงอาทิตย์ สไตล์ภาพประกอบน่ารักที่มุมภาพ'},
+    {id:'parents',n:'ประชุมผู้ปกครอง',pri:'#2c4a7a',acc:'#7fc8a9',t:'การประชุมผู้ปกครองและเครือข่าย โทนน้ำเงินและเขียวมิ้นต์ เป็นทางการแต่เป็นมิตร ลายเส้นเรขาคณิตโค้งมน ไอคอนบ้าน หัวใจ มือจับกัน (ไม่มีใบหน้าคน) ที่มุมภาพ'},
+    {id:'trip',n:'ทัศนศึกษา',pri:'#00695c',acc:'#ffca28',t:'กิจกรรมทัศนศึกษานอกสถานที่ โทนเขียวเทอร์ควอยซ์และเหลือง รถบัสโรงเรียนการ์ตูน แผนที่ หมุดปักตำแหน่ง ภูเขา ต้นไม้ ทางเดินเส้นประ ที่ขอบและมุมภาพ'},
+  ];
+  const presetBox=$('presets');
+  PRESETS.forEach(p=>{
+    const b=document.createElement('button'); b.type='button'; b.dataset.id=p.id;
+    const i=document.createElement('i'); i.style.background=`linear-gradient(135deg,${p.pri} 50%,${p.acc} 50%)`;
+    b.appendChild(i); b.appendChild(document.createTextNode(p.n));
+    b.onclick=()=>{
+      $('theme').value=p.t; $('cPri').value=p.pri; $('cAcc').value=p.acc;
+      S.preset=p.id; markPreset(); promptEdited=false; refreshPrompt(); saveText(); render();
+    };
+    presetBox.appendChild(b);
+  });
+  function markPreset(){ [...presetBox.children].forEach(c=>c.classList.toggle('on',c.dataset.id===S.preset)); }
+  S.mood='normal';
+  $('moodSeg').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; S.mood=b.dataset.v;
+    [...$('moodSeg').children].forEach(c=>c.classList.toggle('on',c===b)); promptEdited=false; refreshPrompt(); saveText();});
+
+  // ---------- prompt (adapts to the locked layout & size) ----------
+  function buildPrompt(){
+    const [W,H]=S.size.split('x').map(Number);
+    const ratio={ '1080x1350':'4:5 portrait (Facebook post)', '1080x1528':'A4 portrait (1:1.414)', '1080x1920':'9:16 vertical (story)'}[S.size];
+    const theme=$('theme').value.trim()||'บรรยากาศโรงเรียนประถมศึกษา สดใส สะอาดตา';
+    const L=layout(W,H);
+    const pct=v=>Math.round(v/H*100);
+    const zone=(r,name)=>`- ${name}: from ${pct(r.y)}% to ${pct(r.y+r.h)}% of the height (y ${Math.round(r.y)}–${Math.round(r.y+r.h)} px), x ${r.x}–${r.x+r.w} px`;
+    const zones=[zone(L.header,'Header (school logo + name)'),zone(L.title,'Title + date'),zone(L.big,'Main photo'),zone(L.small,'Row of 6 small photos'),zone(L.desc,'Description text')];
+    if(L.exec) zones.push(zone(L.exec,'Executive portraits with names (the center one is larger)'));
+    const mood={
+      soft:'Decoration level: minimal and formal — thin elegant ornaments only at the corners and edges; mostly calm background.',
+      normal:'Decoration level: balanced — clear themed decoration at the edges and corners, a few accents in the gaps, calm behind content areas.',
+      rich:'Decoration level: rich and festive — dense, eye-catching decoration around all edges and corners, but still calm behind content areas.'
+    }[S.mood||'normal'];
+    return `Create a decorative BACKGROUND image (no content) for a Thai primary-school public-relations news poster.
+
+SIZE: exactly ${W}×${H} px, ${ratio}. Vertical orientation.
+
+THEME / STYLE (in Thai):
+${theme}
+
+MAIN COLORS: ${$('cPri').value} (main) and ${$('cAcc').value} (accent), plus soft light tones.
+${mood}
+
+LAYOUT — content will be placed on top later in these white panels (a ${L.M}px margin on the left and right is free for decoration):
+${zones.join('\n')}
+The attached layout guide shows the same areas as gray boxes.
+
+RULES:
+1. Behind every content area keep the background calm, light and low-detail (soft gradient or very subtle texture) so white panels and photos on top stay clean.
+2. Put the decoration mainly on the outer margins, the four corners, the very top and bottom edges, and the thin gaps between areas.
+3. Do NOT draw the gray boxes, panels, frames or placeholders.
+4. ABSOLUTELY NO text, letters, Thai or English characters, numbers, logos, emblems, watermarks, people, faces or photographs.
+5. High quality, crisp details, print-ready, professional school PR style.`;
+  }
+  let promptEdited=false;
+  $('prompt').addEventListener('input',()=>{promptEdited=true;});
+  function refreshPrompt(){ if(!promptEdited) $('prompt').value=buildPrompt(); }
+  $('theme').addEventListener('input',()=>{promptEdited=false;refreshPrompt();});
+  const pMsg=$('pMsg');
+  $('copyPrompt').onclick=async()=>{
+    refreshPrompt();
+    try{ await navigator.clipboard.writeText($('prompt').value); pMsg.className='msg'; pMsg.textContent='คัดลอก prompt แล้ว นำไปวางใน ChatGPT พร้อมแนบภาพโครงร่าง'; }
+    catch(e){ const det=document.querySelector('details'); det.open=true; $('prompt').select(); pMsg.className='msg'; pMsg.textContent='เลือกข้อความไว้แล้ว กดคัดลอกได้เลย'; }
+  };
+
+  // ---------- render ----------
+  let timer=null,lastURL=null;
+  function schedule(){clearTimeout(timer);timer=setTimeout(render,120);}
+  function render(){
+    const [W,H]=S.size.split('x').map(Number); cv.width=W; cv.height=H;
+    try{ drawAll(W,H); }catch(e){ console.error(e); }
+    cv.toBlob(b=>{ if(!b) return; if(lastURL) URL.revokeObjectURL(lastURL); lastURL=URL.createObjectURL(b); $('preview').src=lastURL; },'image/png');
+  }
+  function renderBlob(guide){
+    const [W,H]=S.size.split('x').map(Number); cv.width=W; cv.height=H;
+    drawAll(W,H,{guide});
+    return new Promise(r=>cv.toBlob(r,'image/png'));
+  }
+
+  TEXT_IDS.forEach(id=>$(id).addEventListener('input',()=>{ if(/^n\d$|^c(Pri|Acc)$/.test(id)) refreshPrompt(); if(id==='op') $('opV').textContent=$('op').value; saveText(); schedule(); }));
+  $('date').addEventListener('input',schedule);
+  $('sizeSeg').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; S.size=b.dataset.v;
+    [...$('sizeSeg').children].forEach(c=>c.classList.toggle('on',c===b)); promptEdited=false; refreshPrompt(); saveText(); render();});
+
+  restoreText(); markPreset(); [...$('moodSeg').children].forEach(c=>c.classList.toggle('on',c.dataset.v===(S.mood||'normal'))); $('opV').textContent=$('op').value; refreshPrompt();
+  restoreImgs().then(render);
+  Promise.all(['800 40px "Prompt"','700 40px "Prompt"','600 40px "Prompt"','500 40px "Prompt"','500 40px "Sarabun"','400 40px "Sarabun"'].map(f=>document.fonts.load(f))).catch(()=>{}).finally(render);
+  render();
+
+  // ---------- downloads ----------
+  let downloads=null;
+  async function saveFile(blob,name,msgEl){
+    msgEl.className='msg'; msgEl.textContent='';
+    if(!downloads){ // ทำงานนอก Claude (เช่น GitHub Pages): ดาวน์โหลดแบบปกติ
+      try{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); msgEl.textContent='กำลังดาวน์โหลด…'; }
+      catch(e){ msgEl.className='msg err'; msgEl.textContent='ดาวน์โหลดไม่ได้ ให้กดค้างที่ภาพหรือคลิกขวา > บันทึกรูปภาพ'; }
+      return; }
+    try{ const r=await downloads.save({filename:name,data:blob}); msgEl.textContent=r.status==='saved'?'บันทึกไฟล์เรียบร้อย':'ส่งไฟล์เรียบร้อย'; }
+    catch(e){ msgEl.className='msg err'; const c=e&&e.code;
+      msgEl.textContent=c==='declined'?'ยกเลิกการบันทึก':c==='rate_limited'?'กรุณารอสักครู่แล้วลองใหม่':c==='host_unavailable'?'แอปนี้บันทึกไฟล์ไม่ได้ ให้เปิดหน้านี้ในเบราว์เซอร์':'บันทึกไม่สำเร็จ ลองกดค้างที่ภาพเพื่อบันทึก'; }
+  }
+  const fname=()=>'ข่าว-'+(($('headline').value.trim().replace(/[\\/:*?"<>|\n\r]+/g,' ').slice(0,40).trim())||'ภาพข่าว')+'.png';
+  $('dlBtn').onclick=async()=>{ const b=await renderBlob(false); render(); saveFile(b,fname(),$('dlMsg')); };
+  $('guideBtn').onclick=async()=>{ const b=await renderBlob(true); render(); saveFile(b,`layout-guide-${S.size}.png`,pMsg); };
+
+  // ---------- capabilities ----------
+  if(window.claude&&typeof window.claude.use==='function'){
+    window.claude.use('downloads').then(d=>{downloads=d;}).catch(()=>{});
+    window.claude.use('sample').then(sample=>{
+      if(!sample) return;
+      $('capCard').classList.remove('hidden');
+      const msg=$('capMsg'); let ctrl=null;
+      $('capBtn').onclick=async()=>{
+        if(ctrl) ctrl.abort(); ctrl=new AbortController();
+        msg.className='msg'; msg.textContent='กำลังเขียน…'; $('capBtn').disabled=true;
+        const execs=[0,1,2].map(i=>({ชื่อ:$('n'+i).value.trim(),ตำแหน่ง:$('r'+i).value.trim()})).filter(p=>p.ชื่อ);
+        const info={โรงเรียน:$('school').value.trim(),ชื่อกิจกรรม:$('headline').value.trim(),คำบรรยาย:$('detail').value.trim(),วันที่:thaiDate($('date').value),ผู้บริหาร:execs};
+        const prompt=`คุณคือครูผู้รับผิดชอบงานประชาสัมพันธ์ของโรงเรียนประถมศึกษาในประเทศไทย
+เขียนแคปชันโพสต์ Facebook ภาษาไทยสำหรับข่าวกิจกรรมของโรงเรียน จากข้อมูลต่อไปนี้ (JSON):
+${JSON.stringify(info)}
+
+ข้อกำหนด:
+- ภาษาสุภาพ เป็นทางการแบบข่าวประชาสัมพันธ์โรงเรียน ยาว 3–5 ประโยค
+- ถ้ามีรายชื่อผู้บริหาร ให้กล่าวถึงตามลำดับและตำแหน่งที่ให้มาอย่างถูกต้อง เช่น "นำโดย..."
+- ใช้อีโมจิได้เล็กน้อย (ไม่เกิน 3 ตัว)
+- ปิดท้ายด้วยแฮชแท็ก 2–4 อัน
+- ห้ามแต่งข้อเท็จจริงที่ไม่มีในข้อมูล
+- ตอบเฉพาะแคปชันเท่านั้น`;
+        try{ const r=await sample(prompt,{signal:ctrl.signal,modelTier:'quick',onText:({text})=>{$('capOut').value=text;}});
+          $('capOut').value=r.text.trim(); msg.textContent='เสร็จแล้ว แก้ไขต่อได้'; }
+        catch(e){ msg.className='msg err'; if(e&&e.code==='not_granted') $('capCard').classList.add('hidden');
+          else msg.textContent=e&&e.code==='rate_limited'?'ใช้งานถี่เกินไป กรุณารอสักครู่':'เขียนแคปชันไม่สำเร็จ ลองใหม่อีกครั้ง'; }
+        finally{ $('capBtn').disabled=false; }
+      };
+      $('capCopy').onclick=async()=>{ try{await navigator.clipboard.writeText($('capOut').value); msg.className='msg'; msg.textContent='คัดลอกแล้ว';}catch(e){$('capOut').select(); msg.textContent='เลือกข้อความไว้แล้ว กดคัดลอกได้เลย';} };
+    }).catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
