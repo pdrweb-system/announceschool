@@ -406,20 +406,19 @@
     const people=[0,1,2].filter(i=>$('n'+i).value.trim()||S.imgs['p'+i]);
     const L={M,inW};
     let y=36;
+    // แถบผู้บริหารอยู่บนสุด; ผอ.เขต (0) อยู่ตรงกลางเมื่อมีครบ 3 คน
+    const hasBoss=people.includes(0);
+    const execH=people.length?(hasBoss&&people.length>1?282:252):0, descH=144, smallH=Math.round((inW-5*10)/6);
+    let order=people;
+    if(hasBoss&&people.length===3) order=[1,0,2];
+    if(execH){ L.exec={x:M,y,w:inW,h:execH,people:order,boss:hasBoss&&people.length>1}; y+=execH+g; }
     L.header={x:M,y,w:inW,h:128}; y+=128+g;
     L.title={x:M,y,w:inW,h:188}; y+=188+g;
-    const bottom=[];
-    const hasBoss=people.includes(0);
-    const execH=people.length?(hasBoss&&people.length>1?282:252):0, descH=144, smallH=S.small.length||1?Math.round((inW-5*10)/6):0;
-    const fixed=smallH+12+g+descH+g+(execH?execH+g:0)+36;
+    const fixed=smallH+12+g+descH+36;
     const bigH=H-y-fixed;
     L.big={x:M,y,w:inW,h:bigH}; y+=bigH+12+5;
     L.small={x:M,y,w:inW,h:smallH}; y+=smallH+g;
-    L.desc={x:M,y,w:inW,h:descH}; y+=descH+g;
-    // ผอ.เขต (0) อยู่ตรงกลางเมื่อมีครบ 3 คน
-    let order=people;
-    if(hasBoss&&people.length===3) order=[1,0,2];
-    if(execH) L.exec={x:M,y,w:inW,h:execH,people:order,boss:hasBoss&&people.length>1};
+    L.desc={x:M,y,w:inW,h:descH};
     return L;
   }
 
