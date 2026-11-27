@@ -31,6 +31,7 @@
   .person:first-of-type{border-top:0}
   .pic{width:64px;height:64px;border-radius:50%;background:#f0f0f0;border:1px dashed #b9c6bd;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:11px;cursor:pointer;text-align:center;line-height:1.2}
   .pic img{width:100%;height:100%;object-fit:cover}
+  .pic:has(img){background:linear-gradient(#bfe0fa,#fff);border-style:solid}
   .person .t{font-family:"Prompt";font-size:13px;font-weight:600;margin-bottom:4px}
   .person input{margin-bottom:6px}
   .drop{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted);cursor:pointer;font-size:13px;background:#fafcfa}
@@ -255,7 +256,7 @@
       const slot=el.dataset.slot;
       if(S.imgs[slot] && !confirmInline(el)) return;
       pickOne(async img=>{
-        const url=shrink(img, slot==='logo'?500:600, slot==='logo'?'image/png':'image/jpeg');
+        const url=shrink(img, slot==='logo'?500:600, slot==='logo'?'image/png':'image/webp');
         S.imgs[slot]=await srcToImg(url); store.set('newsimg.v2.'+slot,url);
         setPic(slot,S.imgs[slot]); render();
       });
@@ -389,8 +390,10 @@
     ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,d/2+7,0,Math.PI*2); ctx.fillStyle=ring2; ctx.fill();
     ctx.beginPath(); ctx.arc(cx,cy,d/2+3,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill(); ctx.restore();
     ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,d/2,0,Math.PI*2); ctx.clip();
+    const bgG=ctx.createLinearGradient(0,cy-d/2,0,cy+d/2); bgG.addColorStop(0,'#bfe0fa'); bgG.addColorStop(1,'#ffffff');
+    ctx.fillStyle=bgG; ctx.fillRect(cx-d/2,cy-d/2,d,d);
     if(img){ const s=Math.max(d/img.naturalWidth,d/img.naturalHeight), iw=img.naturalWidth*s, ih=img.naturalHeight*s; ctx.drawImage(img,cx-iw/2,cy-d/2-(ih-d)*0.15,iw,ih); }
-    else { ctx.fillStyle='#dfe5e1'; ctx.fillRect(cx-d/2,cy-d/2,d,d); ctx.fillStyle='#b8c2bc'; ctx.beginPath(); ctx.arc(cx,cy-d*0.1,d*0.2,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(cx,cy+d*0.38,d*0.34,d*0.26,0,0,Math.PI*2); ctx.fill(); }
+    else { ctx.fillStyle='#9fc3df'; ctx.beginPath(); ctx.arc(cx,cy-d*0.1,d*0.2,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(cx,cy+d*0.38,d*0.34,d*0.26,0,0,Math.PI*2); ctx.fill(); }
     ctx.restore();
   }
   function logo(img,x,y,d){
