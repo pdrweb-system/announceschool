@@ -408,7 +408,11 @@
     let y=36;
     // หัว (โลโก้+ชื่อโรงเรียน) อยู่บนสุด ตามด้วยแถบผู้บริหาร; ผอ.เขต (0) อยู่ตรงกลางเมื่อมีครบ 3 คน
     const hasBoss=people.includes(0);
-    const execH=people.length?(hasBoss&&people.length>1?236:212):0, descH=204, smallH=Math.round((inW-5*10)/6);
+    const execH=people.length?(hasBoss&&people.length>1?236:212):0, smallH=Math.round((inW-5*10)/6);
+    // ช่องคำบรรยายสูงตามจำนวนบรรทัดจริง (ฟอนต์ 26px) ต่ำสุด 120 สูงสุด 340
+    ctx.save(); ctx.font='500 26px "Sarabun"';
+    const nLines=wrap($('detail').value.trim()||'คำบรรยายกิจกรรม',inW-56).lines.length; ctx.restore();
+    const descH=Math.min(340,Math.max(120,Math.ceil(nLines*26*1.42+44)));
     let order=people;
     if(hasBoss&&people.length===3) order=[1,0,2];
     L.header={x:M,y,w:inW,h:128}; y+=128+g;
@@ -489,7 +493,7 @@
     const d=L.desc; panel(d.x,d.y,d.w,d.h,20,op);
     const det=$('detail').value.trim()||'คำบรรยายกิจกรรม';
     ctx.fillStyle='#2b3530';
-    const df=fit(det,'500','Sarabun',28,18,d.w-56,5,1.42,d.h-36);
+    const df=fit(det,'500','Sarabun',26,16,d.w-56,10,1.42,d.h-30);
     const dH=df.lines.length*df.lh;
     lines(df.lines,d.x+28,d.y+(d.h-dH)/2+df.size*1.05,df.lh);
 
